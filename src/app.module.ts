@@ -1,0 +1,38 @@
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
+import { AppController } from './app.controller.js';
+import { AppService } from './app.service.js';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UsersModule } from './users/users.module.js';
+import { LoggerMiddleware } from './common/logger/logger.middleware.js';
+import { AuthModule } from './auth/auth.module.js';
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (cfg: ConfigService) => ({
+        type: 'postgres',
+        host: cfg.getOrThrow<string>('DB_HOST'),
+        port: cfg.getOrThrow<number>('DB_PORT'),
+        username: cfg.getOrThrow<string>('DB_USER'),
+        password: cfg.getOrThrow<string>('DB_PASS'),
+        database: cfg.getOrThrow<string>('DB_NAME'),
+        autoLoadEntities: true,
+        synchronize: true, // HANYA development!
+      }),
+    }),
+    UsersModule,
+    AuthModule,
+  ],
+  controllers: [AppController],
+  providers: [AppService],
+})
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(LoggerMiddleware)
+      .forRoutes({ path: '*', method: RequestMethod.ALL });
+  }
+}
