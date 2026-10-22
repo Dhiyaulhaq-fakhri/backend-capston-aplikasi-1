@@ -27,6 +27,9 @@ export class AuthService {
     ) {}
 
     async register(dto: RegisterDto): Promise<AuthResult> {
+        
+        const { confirmPassword, ...createData } = dto; 
+
         const created = await this.usersService.create(dto);
 
         const accessToken = await this.signToken(created.id, created.email);

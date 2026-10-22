@@ -17,10 +17,7 @@ export class User {
     @Column({ type: 'varchar', length: 70, unique: true })
     email: string;
 
-    @Column({ type: 'varchar', length: 255, select: false })
-    password: string;
-
-    @Column({ type: 'varchar', nullable: true })
+    @Column({ type: 'varchar', length: 25, nullable: true })
     phone: string | null;
 
     @Column({ type: 'varchar', length: 50, default: 'user' })
@@ -31,4 +28,7 @@ export class User {
 
     @UpdateDateColumn({ name: 'updated_at', type: 'timestamp' })
     updatedAt: Date;
+
+    @Column({ type: 'varchar', length: 255, select: false })
+    password: string;
 }
