@@ -21,9 +21,4 @@ export class CreateUserDto {
     message: 'phone harus berupa nomor telepon yang valid',
     })
     phone?: string;
-
-    @IsOptional()
-    @IsString()
-    @IsIn(['user', 'farmer', 'admin']) // Batasi hanya boleh 'user' atau 'admin'
-    role?: string;
 }

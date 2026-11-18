@@ -9,7 +9,12 @@ import { AuthModule } from './auth/auth.module.js';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({ 
+      isGlobal: true, 
+      envFilePath: process.env.ENV_FILE || '.env',
+    }),
+    
+    // TypeOrmModule
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (cfg: ConfigService) => ({
@@ -23,6 +28,7 @@ import { AuthModule } from './auth/auth.module.js';
         synchronize: true, // HANYA development!
       }),
     }),
+    
     UsersModule,
     AuthModule,
   ],

@@ -4,13 +4,15 @@ import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service.js';
 import { LoginDto } from './dto/login.dto.js';
 import { RegisterDto } from './dto/register.dto.js';
+import { User } from '../users/entities/user.entity.js';
+import { UserRole } from '../common/enums/user-role.enum.js';
 
 export interface AuthUser {
     id: number;
     name: string;
     email: string;
     phone: string | null;
-    role: string;
+    role: UserRole;
 }
 
 export interface AuthResult {
@@ -30,9 +32,9 @@ export class AuthService {
         
         const { confirmPassword, ...createData } = dto; 
 
-        const created = await this.usersService.create(dto);
+        const created = await this.usersService.create(createData);
 
-        const accessToken = await this.signToken(created.id, created.email);
+        const accessToken = await this.signToken(created.id, created.email, created.role);
 
         return {
             user: this.toAuthUser(created),
@@ -52,7 +54,7 @@ export class AuthService {
             throw new UnauthorizedException('Email atau password salah');
         }
 
-        const accessToken = await this.signToken(user.id, user.email);
+        const accessToken = await this.signToken(user.id, user.email, user.role);
 
         return {
             user: this.toAuthUser(user),
@@ -60,11 +62,11 @@ export class AuthService {
         };
     }
 
-    private signToken(userId: number, email: string): Promise<string> {
-        return this.jwtService.signAsync({ sub: userId, email });
+    private signToken(userId: number, email: string, role: UserRole): Promise<string> {
+        return this.jwtService.signAsync({ sub: userId, email, role });
     }
 
-    private toAuthUser(user: AuthUser): AuthUser {
+    private toAuthUser(user: Omit<User, 'password'>): AuthUser {
         return {
             id: user.id,
             name: user.name,

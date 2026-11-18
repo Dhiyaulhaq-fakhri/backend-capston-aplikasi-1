@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from './entities/user.entity.js';
+import { UserRole } from '../common/enums/user-role.enum.js';
 
 @Injectable()
 export class UsersService {
@@ -23,7 +24,7 @@ export class UsersService {
       email: dto.email,
       password: hashed,
       phone: dto.phone ?? null,
-      role: dto.role ?? 'user',
+      role: UserRole.CUSTOMER,
     });
     const saved = await this.usersRepository.save(user);
 
@@ -32,13 +33,19 @@ export class UsersService {
   }
 
   async findAll(): Promise<Omit<User, 'password'>[]> {
-    return this.usersRepository.find();
+    const users = await this.usersRepository.find();
+    return users.map(({ password, ...rest }) => rest);
   }
 
   async findById(id: number): Promise<Omit<User, 'password'>> {
     const user = await this.usersRepository.findOneBy({ id });
     if (!user) throw new NotFoundException(`User #${id} tidak ditemukan`);
-    return user;
+    const { password, ...rest } = user;
+    return rest;
+  }
+
+  async findByEmail(email: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { email } });
   }
 
   async findByEmailWithPassword(email: string): Promise<User | null> {
@@ -49,23 +56,18 @@ export class UsersService {
       .getOne();
   }
 
-  async update(
-    id: number,
-    dto: UpdateUserDto,
-  ): Promise<Omit<User, 'password'>> {
-    await this.findById(id); // pastikan ada
-
+  async update(id: number, dto: UpdateUserDto): Promise<Omit<User, 'password'>> {
+    await this.findById(id);
     if (dto.password) {
       dto.password = await bcrypt.hash(dto.password, 10);
     }
-
     await this.usersRepository.update(id, dto);
     return this.findById(id);
   }
 
   async remove(id: number): Promise<{ deleted: true }> {
     await this.findById(id);
-    await this.usersRepository.delete(id);
+    await this.usersRepository.delete(id);  // kalau pakai @DeleteDateColumn
     return { deleted: true };
   }
 }
