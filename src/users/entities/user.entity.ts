@@ -5,8 +5,11 @@ import {
     CreateDateColumn,
     UpdateDateColumn,
     DeleteDateColumn,
+    OneToOne,
 } from 'typeorm';
+import type { Relation } from 'typeorm';
 import { UserRole } from '../../common/enums/user-role.enum.js';
+import { FarmerProfile } from './farmer-profile.entity.js';
 
 @Entity('users')
 export class User {
@@ -36,4 +39,7 @@ export class User {
 
     @Column({ type: 'varchar', length: 255, select: false })
     password: string;
+
+    @OneToOne(() => FarmerProfile, (profile) => profile.user)
+    farmerProfile?: Relation<FarmerProfile>
 }
