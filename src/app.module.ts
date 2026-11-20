@@ -7,6 +7,7 @@ import { UsersModule } from './users/users.module.js';
 import { LoggerMiddleware } from './common/logger/logger.middleware.js';
 import { AuthModule } from './auth/auth.module.js';
 import { FarmersModule } from './farmers/farmers.module.js';
+import { LivestockModule } from './livestock/livestock.module.js';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { FarmersModule } from './farmers/farmers.module.js';
     UsersModule,
     AuthModule,
     FarmersModule,
+    LivestockModule,
   ],
   controllers: [AppController],
   providers: [AppService],
